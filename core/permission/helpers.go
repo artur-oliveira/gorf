@@ -35,16 +35,28 @@ func IsReadOnlyMethod(method string) bool {
 	}
 }
 
-func getActionForMethod(method string) (string, error) {
+func getActionForContext(c *fiber.Ctx) (string, error) {
+	method := c.Method()
+	hasId := c.Params("id", "") != ""
+
 	switch method {
-	case fiber.MethodGet, fiber.MethodHead, fiber.MethodOptions:
-		return "view", nil
+	case fiber.MethodHead, fiber.MethodOptions:
+		return "", nil
+	case fiber.MethodGet:
+		{
+			if hasId {
+				return models.DetailAction, nil
+			}
+			return models.ListAction, nil
+		}
 	case fiber.MethodPost:
-		return "add", nil
-	case fiber.MethodPut, fiber.MethodPatch:
-		return "change", nil
+		return models.CreateAction, nil
+	case fiber.MethodPut:
+		return models.UpdateAction, nil
+	case fiber.MethodPatch:
+		return models.PartialUpdateAction, nil
 	case fiber.MethodDelete:
-		return "delete", nil
+		return models.DeleteAction, nil
 	default:
 		return "", errors.New("método HTTP não suportado: " + method)
 	}

@@ -1,19 +1,22 @@
 package database
 
 import (
-	"grf/core/server"
-	"grf/domain/auth"
+	"grf/core/config"
 	"log"
+
+	"gorm.io/gorm"
 )
 
-func RegisterMigrations(app *server.App) {
+type MigrationOptions struct {
+	DB     *gorm.DB
+	Config *config.Config
+	Models []interface{}
+}
+
+func RegisterMigrations(options *MigrationOptions) {
 	log.Println("starting database migrations")
 
-	var allModels []interface{}
-
-	allModels = append(allModels, auth.GetModels()...)
-
-	if err := PerformMigration(app.DB, app.Config, allModels...); err != nil {
+	if err := PerformMigration(options.DB, options.Config, options.Models...); err != nil {
 		log.Fatalf("Failed to perform automigrations: %v", err)
 	}
 

@@ -18,8 +18,14 @@ type App struct {
 
 	I18nMw *middleware.I18NMiddleware
 
+	Models []interface{}
+
 	AllowAny                  permission.IPermission
 	IsAuthenticatedOrReadOnly permission.IPermission
 	IsAuthenticated           permission.IPermission
 	IsAdmin                   permission.IPermission
+}
+
+func (a *App) Start() error {
+	return a.FiberApp.Listen(":" + a.Config.ServerPort)
 }

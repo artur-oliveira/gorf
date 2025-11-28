@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"grf/core/pagination"
 	"grf/core/tests"
-	auth_dto "grf/domain/auth/dto"
+	authdto "grf/domain/auth/dto"
 	"net/http"
 	"testing"
 
@@ -24,7 +24,7 @@ func TestUserCRUD(t *testing.T) {
 	var createdUserID uint64
 
 	t.Run("POST /users (Admin 201)", func(t *testing.T) {
-		dto := auth_dto.UserCreateDTO{
+		dto := authdto.UserCreateDTO{
 			Username: "newuser", Email: "new@user.com", Password: "password123",
 		}
 		resp, body := tests.MakeRequest(t, testApp.FiberApp, tests.RequestOptions{
@@ -34,7 +34,7 @@ func TestUserCRUD(t *testing.T) {
 			t.Fatalf("Esperado 201, obteve %d: %s", resp.StatusCode, body)
 		}
 
-		var respDTO auth_dto.UserResponseDTO
+		var respDTO authdto.UserResponseDTO
 		err := json.Unmarshal([]byte(body), &respDTO)
 		if err != nil {
 			return
@@ -46,7 +46,7 @@ func TestUserCRUD(t *testing.T) {
 	})
 
 	t.Run("POST /users (User 403)", func(t *testing.T) {
-		dto := auth_dto.UserCreateDTO{Username: "failuser", Email: "fail@user.com", Password: "password123"}
+		dto := authdto.UserCreateDTO{Username: "failuser", Email: "fail@user.com", Password: "password123"}
 		resp, _ := tests.MakeRequest(t, testApp.FiberApp, tests.RequestOptions{
 			Method: http.MethodPost, URL: "/v1/users", Token: userToken, Body: dto,
 		})
@@ -63,7 +63,7 @@ func TestUserCRUD(t *testing.T) {
 			t.Fatalf("Esperado 200, obteve %d: %s", resp.StatusCode, body)
 		}
 
-		var listResp pagination.Response[auth_dto.UserResponseDTO]
+		var listResp pagination.Response[authdto.UserResponseDTO]
 		err := json.Unmarshal([]byte(body), &listResp)
 		if err != nil {
 			return
@@ -94,7 +94,7 @@ func TestUserCRUD(t *testing.T) {
 			t.Fatalf("Esperado 200, obteve %d: %s", resp.StatusCode, body)
 		}
 
-		var respDTO auth_dto.UserResponseDTO
+		var respDTO authdto.UserResponseDTO
 		err := json.Unmarshal([]byte(body), &respDTO)
 		if err != nil {
 			return

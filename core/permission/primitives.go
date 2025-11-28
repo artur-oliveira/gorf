@@ -95,9 +95,12 @@ func (p *ModelPermissions) Check(c *fiber.Ctx) error {
 		return err
 	}
 
-	action, err := getActionForMethod(c.Method())
+	action, err := getActionForContext(c)
 	if err != nil {
 		return exceptions.NewInternal(err)
+	}
+	if action == "" {
+		return nil
 	}
 	if !user.HasPerm(p.DB, p.Model.ModuleName(), action) {
 		permKey := p.Model.ModuleName() + "." + action

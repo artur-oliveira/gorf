@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"grf/core/tests"
-	auth_dto "grf/domain/auth/dto"
+	authdto "grf/domain/auth/dto"
 	"net/http"
 	"testing"
 )
@@ -20,10 +20,10 @@ func TestGroupCRUD(t *testing.T) {
 	userToken, _ := loginAs(t, "user", "user123")
 
 	var createdGroupID uint64
-	permID := fixtures.PermViewUser.ID
+	permID := fixtures.PermListUser.ID
 
 	t.Run("POST /groups (Admin 201 M2M)", func(t *testing.T) {
-		dto := auth_dto.GroupCreateDTO{
+		dto := authdto.GroupCreateDTO{
 			Name:          "Grupo M2M",
 			PermissionIDs: []uint64{permID},
 		}
@@ -34,7 +34,7 @@ func TestGroupCRUD(t *testing.T) {
 			t.Fatalf("Esperado 201, obteve %d: %s", resp.StatusCode, body)
 		}
 
-		var respDTO auth_dto.GroupResponseDTO
+		var respDTO authdto.GroupResponseDTO
 		err := json.Unmarshal([]byte(body), &respDTO)
 		if err != nil {
 			return
@@ -49,7 +49,7 @@ func TestGroupCRUD(t *testing.T) {
 	})
 
 	t.Run("POST /groups (User 403)", func(t *testing.T) {
-		dto := auth_dto.GroupCreateDTO{Name: "Grupo Falho"}
+		dto := authdto.GroupCreateDTO{Name: "Grupo Falho"}
 		resp, _ := tests.MakeRequest(t, testApp.FiberApp, tests.RequestOptions{
 			Method: http.MethodPost, URL: "/v1/groups", Token: userToken, Body: dto,
 		})
@@ -61,7 +61,7 @@ func TestGroupCRUD(t *testing.T) {
 	t.Run("PUT /groups/:id (Admin 200 M2M Replace)", func(t *testing.T) {
 		url := fmt.Sprintf("/v1/groups/%d", createdGroupID)
 		newPermID := fixtures.PermAddUser.ID
-		dto := auth_dto.GroupUpdateDTO{
+		dto := authdto.GroupUpdateDTO{
 			Name:          "Grupo M2M Atualizado",
 			PermissionIDs: []uint64{newPermID},
 		}
@@ -73,7 +73,7 @@ func TestGroupCRUD(t *testing.T) {
 			t.Fatalf("Esperado 200, obteve %d: %s", resp.StatusCode, body)
 		}
 
-		var respDTO auth_dto.GroupResponseDTO
+		var respDTO authdto.GroupResponseDTO
 		err := json.Unmarshal([]byte(body), &respDTO)
 		if err != nil {
 			return

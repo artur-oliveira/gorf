@@ -12,6 +12,7 @@ type IRepository[T models.IModel, ID comparable] interface {
 	FindPaginated(filter filterset.IFilterSet, pagination pagination.IPagination[T]) (*pagination.Response[T], error)
 	FindById(id ID) (T, error)
 	Create(entity T) error
+	CreateMany(entity []T) error
 	Update(entity T) error
 	PartialUpdate(entity T, updates map[string]interface{}) error
 	Delete(id ID) error
@@ -59,6 +60,10 @@ func (r *GenericRepository[T, ID]) FindById(id ID) (T, error) {
 
 func (r *GenericRepository[T, ID]) Create(entity T) error {
 	return handleTx(r.DB.Create(entity))
+}
+
+func (r *GenericRepository[T, ID]) CreateMany(entities []T) error {
+	return handleTx(r.DB.Create(entities))
 }
 
 func (r *GenericRepository[T, ID]) Update(entity T) error {

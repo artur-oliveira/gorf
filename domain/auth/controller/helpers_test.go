@@ -2,6 +2,7 @@ package controller_test
 
 import (
 	"encoding/json"
+	"grf/core/models"
 	tests2 "grf/core/tests"
 	"grf/domain/auth/dto"
 	"grf/domain/auth/model"
@@ -17,7 +18,6 @@ var authTables = []string{
 	"auth_group_permissions",
 	"auth_user",
 	"auth_group",
-	"auth_permission",
 }
 
 func clearAuthTables(db *gorm.DB) {
@@ -27,27 +27,41 @@ func clearAuthTables(db *gorm.DB) {
 type TestFixtures struct {
 	AdminUser    *model.User
 	NormalUser   *model.User
-	PermViewUser *model.Permission
+	PermListUser *model.Permission
 	PermAddUser  *model.Permission
-	PermViewGrp  *model.Permission
-	PermAddGrp   *model.Permission
-	PermViewPerm *model.Permission
-	PermAddPerm  *model.Permission
+}
+
+func getPerm(db *gorm.DB, module string, action string) *model.Permission {
+	var perm *model.Permission
+	if err := db.Where("module = ? and action = ?", module, action).First(&perm).Error; err != nil {
+		panic(err)
+	}
+	return perm
 }
 
 func createTestFixtures(db *gorm.DB) (*TestFixtures, error) {
 	perms := []*model.Permission{
-		{Module: "auth", Action: "view_user"}, {Module: "auth", Action: "add_user"},
-		{Module: "auth", Action: "change_user"}, {Module: "auth", Action: "delete_user"},
-		{Module: "auth", Action: "view_group"}, {Module: "auth", Action: "add_group"},
-		{Module: "auth", Action: "change_group"}, {Module: "auth", Action: "delete_group"},
-		{Module: "auth", Action: "view_permission"}, {Module: "auth", Action: "add_permission"},
-		{Module: "auth", Action: "change_permission"}, {Module: "auth", Action: "delete_permission"},
-	}
-	if err := db.Create(&perms).Error; err != nil {
-		return nil, err
-	}
+		getPerm(db, "user", models.ListAction),
+		getPerm(db, "user", models.DetailAction),
+		getPerm(db, "user", models.CreateAction),
+		getPerm(db, "user", models.UpdateAction),
+		getPerm(db, "user", models.PartialUpdateAction),
+		getPerm(db, "user", models.DeleteAction),
 
+		getPerm(db, "group", models.ListAction),
+		getPerm(db, "group", models.DetailAction),
+		getPerm(db, "group", models.CreateAction),
+		getPerm(db, "group", models.UpdateAction),
+		getPerm(db, "group", models.PartialUpdateAction),
+		getPerm(db, "group", models.DeleteAction),
+
+		getPerm(db, "permission", models.ListAction),
+		getPerm(db, "permission", models.DetailAction),
+		getPerm(db, "permission", models.CreateAction),
+		getPerm(db, "permission", models.UpdateAction),
+		getPerm(db, "permission", models.PartialUpdateAction),
+		getPerm(db, "permission", models.DeleteAction),
+	}
 	adminGroup := model.Group{Name: "Admin"}
 	if err := db.Create(&adminGroup).Error; err != nil {
 		return nil, err
@@ -76,14 +90,11 @@ func createTestFixtures(db *gorm.DB) (*TestFixtures, error) {
 	}
 
 	return &TestFixtures{
-		AdminUser:    &adminUser,
-		NormalUser:   &normalUser,
-		PermViewUser: perms[0],
-		PermAddUser:  perms[1],
-		PermViewGrp:  perms[4],
-		PermAddGrp:   perms[5],
-		PermViewPerm: perms[8],
-		PermAddPerm:  perms[9],
+		AdminUser:  &adminUser,
+		NormalUser: &normalUser,
+
+		PermListUser: perms[0],
+		PermAddUser:  perms[2],
 	}, nil
 }
 

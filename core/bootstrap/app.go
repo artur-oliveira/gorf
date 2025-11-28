@@ -18,8 +18,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
-func NewApp(cfg config.Config) (*server.App, error) {
-
+func NewApp(cfg config.Config, models []interface{}) (*server.App, error) {
 	db, err := database.ConnectDB(&cfg)
 	if err != nil {
 		return nil, err
@@ -50,6 +49,7 @@ func NewApp(cfg config.Config) (*server.App, error) {
 		Validator: validator.GetValidator(),
 		I18nMw:    i18nMw,
 		Config:    &cfg,
+		Models:    models,
 
 		AllowAny:        &permission.AllowAny{},
 		IsAuthenticated: isAuthenticated,
@@ -63,9 +63,15 @@ func NewApp(cfg config.Config) (*server.App, error) {
 	i18nMw.UseMiddleWare(
 		app,
 	)
-	database.RegisterMigrations(
-		bootstrapedApp,
-	)
+	database.RegisterMigrations(&database.MigrationOptions{
+		DB:     db,
+		Config: &cfg,
+		Models: models,
+	})
+	permission.RegisterPermissions(&permission.Options{
+		DB:     db,
+		Models: models,
+	})
 	routes.RegisterRoutes(
 		bootstrapedApp,
 	)

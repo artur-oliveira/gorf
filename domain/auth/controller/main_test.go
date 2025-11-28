@@ -4,6 +4,7 @@ import (
 	"grf/core/bootstrap"
 	"grf/core/config"
 	"grf/core/server"
+	"grf/domain/auth"
 	"log"
 	"os"
 	"testing"
@@ -34,7 +35,7 @@ func TestMain(m *testing.M) {
 		JWTSecret:               "test_super_secret_jwt_secret_do_not_verify",
 		JWTExpiresInMinutes:     30,
 		JWTRefreshExpiresInDays: 1,
-	})
+	}, auth.GetModels())
 	if err != nil {
 		log.Fatal(err)
 	}
