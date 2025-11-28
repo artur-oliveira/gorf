@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"grf/core/filterset"
 	"grf/core/models"
 	"grf/core/pagination"
@@ -11,6 +12,7 @@ import (
 type IRepository[T models.IModel, ID comparable] interface {
 	FindPaginated(filter filterset.IFilterSet, pagination pagination.IPagination[T]) (*pagination.Response[T], error)
 	FindById(id ID) (T, error)
+	FindAllById(ids []ID) ([]T, error)
 	Create(entity T) error
 	CreateMany(entity []T) error
 	Update(entity T) error
@@ -56,6 +58,21 @@ func (r *GenericRepository[T, ID]) FindById(id ID) (T, error) {
 		return model, err
 	}
 	return model, nil
+}
+
+func (r *GenericRepository[T, ID]) FindAllById(ids []ID) ([]T, error) {
+	if ids == nil || len(ids) == 0 {
+		return []T{}, nil
+	}
+	var results []T
+	if err := r.DB.Where("id IN ?", ids).Find(&results).Error; err != nil {
+		return nil, err
+	}
+
+	if len(results) != len(ids) {
+		return nil, errors.New("wrong number of results")
+	}
+	return results, nil
 }
 
 func (r *GenericRepository[T, ID]) Create(entity T) error {

@@ -28,3 +28,7 @@ func (dto *GroupPatchDTO) ToPatchMap() map[string]interface{} {
 	}
 	return updates
 }
+
+func (dto *GroupPatchDTO) IsEmpty() bool {
+	return dto.Name == nil
+}

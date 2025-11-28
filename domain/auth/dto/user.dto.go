@@ -61,6 +61,10 @@ func (dto *UserPatchDTO) ToPatchMap() map[string]interface{} {
 	return updates
 }
 
+func (dto *UserPatchDTO) IsEmpty() bool {
+	return dto.Username == nil && dto.Email == nil && dto.FirstName == nil && dto.LastName == nil && dto.IsStaff == nil && dto.IsActive == nil
+}
+
 type UserResponseDTO struct {
 	ID          uint64     `json:"id"`
 	Username    string     `json:"username"`

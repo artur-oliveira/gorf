@@ -11,6 +11,7 @@ import (
 type IService[T models.IModel, C any, U any, P dto.IPatchDTO, R any, F filterset.IFilterSet, ID comparable] interface {
 	List(filter F, pagination pagination.IPagination[T]) (*pagination.Response[T], error)
 	GetByID(id ID) (T, error)
+	GetAllByID(ids []ID) ([]T, error)
 	Create(dto C) (T, error)
 	Update(id ID, dto U) (T, error)
 	PartialUpdate(id ID, dto P) (T, error)
@@ -57,6 +58,10 @@ func (s *GenericService[T, C, U, P, R, F, ID]) GetByID(id ID) (T, error) {
 	return s.Repo.FindById(id)
 }
 
+func (s *GenericService[T, C, U, P, R, F, ID]) GetAllByID(ids []ID) ([]T, error) {
+	return s.Repo.FindAllById(ids)
+}
+
 func (s *GenericService[T, C, U, P, R, F, ID]) Create(dto C) (T, error) {
 	newRecord := s.MapCreateToModel(dto)
 
@@ -83,7 +88,9 @@ func (s *GenericService[T, C, U, P, R, F, ID]) PartialUpdate(id ID, dto P) (T, e
 	if err != nil {
 		return record, err
 	}
-
+	if dto.IsEmpty() {
+		return record, nil
+	}
 	patchMap := dto.ToPatchMap()
 	if len(patchMap) == 0 {
 		return record, nil

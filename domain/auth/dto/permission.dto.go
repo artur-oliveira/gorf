@@ -20,6 +20,10 @@ type PermissionPatchDTO struct {
 	Description *string `json:"description,omitempty" validate:"omitempty,max=255"`
 }
 
+func (dto *PermissionPatchDTO) IsEmpty() bool {
+	return dto.Description == nil
+}
+
 func (dto *PermissionPatchDTO) ToPatchMap() map[string]interface{} {
 	updates := make(map[string]interface{})
 	if dto.Description != nil {
